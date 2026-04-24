@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="combatcatalyst.client/combatcatalyst.client.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="CombatCatalyst.Server/CombatCatalyst.Server.csproj" />
+</Solution>
