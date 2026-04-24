@@ -57,5 +57,9 @@ export default defineConfig({
             key: fs.readFileSync(keyFilePath),
             cert: fs.readFileSync(certFilePath),
         }
+    },
+    build: {
+        outDir: '../CombatCatalyst.Server/wwwroot',
+        emptyOutDir: true,
     }
 })
