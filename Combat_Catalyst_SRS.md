@@ -8,9 +8,9 @@ Changelog v0.3 (Week 6 MVP Update):
     UI & Styling Integration: Implemented Tailwind CSS v4 for comprehensive UI styling, layout management, and responsive design.
 
     API to State Integration: Connected Open5e API ingestion directly to the Zustand state engine, mapping polymorphic snake_case JSON data into the strict camelCase ActiveCombatant interface contract upon initialization.
-
+   
     MVP UI Finalization: Finalized the core MVP visual layout, including dynamic glowing borders for active turn indicators, contextual "End Round" button logic, and absolute-positioned death state overlays.
-
+   
 Changelog v0.2 (Milestone 1 Update):
 
     Tech Stack Revision: Transitioned database persistence from SQL Server to SQLite via Entity Framework Core to better support lightweight, local execution of the engine.
@@ -26,15 +26,18 @@ The Combat Catalyst is a specialized encounter management tool for Dungeons & Dr
 2.1 The "Attack-to-Damage" Confirmation Pipeline
 
 Unlike standard data-entry forms, a D&D combat turn involves "interrupt logic." In a typical software workflow, clicking a button executes an action immediately. In D&D, an "Attack" roll is only a proposal until the Dungeon Master confirms it.
+*	**The Logic:** When a DM triggers a monster attack, the backend calculates the potential outcome (To-Hit and Damage). However, the system must enter a "Pending" state. A modal appears in the UI, allowing the DM to pause and ask the players for reactions (like the Shield spell). The backend must store this transient state until the DM provides a "Commit," "Modify," or "Cancel" command. Managing this asynchronous "human-in-the-loop" validation is the most complex state-management challenge of the project.
+________________________________________
 
     The Logic: When a DM triggers a monster attack, the backend calculates the potential outcome (To-Hit and Damage). However, the system must enter a "Pending" state. A modal appears in the UI, allowing the DM to pause and ask the players for reactions (like the Shield spell). The backend must store this transient state until the DM provides a "Commit," "Modify," or "Cancel" command. Managing this asynchronous "human-in-the-loop" validation is the most complex state-management challenge of the project.
 
 2.2 Dynamic Resource Reset and Round Tracking
 
 Tracking "Limited Resources," such as Legendary Actions or Reactions, requires the system to act as an automated referee that monitors the "Turn Pointer."
+*	**The Logic:** The application uses a central "Round Controller." Every time the active turn shifts to a new creature, a background trigger must check the entity's type and status. If the entity is a "Legendary Creature," the system must automatically reset its "Action Currency." This requires a sophisticated "Observer Pattern" or a state-machine that triggers specific logic based on the round counter and the initiative order, ensuring the DM never has to manually refresh boss abilities.
 
     The Logic: The application uses a central "Round Controller." Every time the active turn shifts to a new creature, a background trigger must check the entity's type and status. If the entity is a "Legendary Creature," the system must automatically reset its "Action Currency." This requires a sophisticated "Observer Pattern" or a state-machine that triggers specific logic based on the round counter and the initiative order, ensuring the DM never has to manually refresh boss abilities.
-
+ 	
 2.3 Polymorphic Data Mapping
 
 Monsters retrieved from the Open5e API do not follow a uniform structure; a "Zombie" has three data points, while a "Ancient Red Dragon" has dozens of actions, resistances, and legendary traits.
