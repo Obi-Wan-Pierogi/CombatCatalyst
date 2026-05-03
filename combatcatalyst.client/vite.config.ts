@@ -2,6 +2,7 @@ import { fileURLToPath, URL } from 'node:url';
 
 import { defineConfig } from 'vite';
 import plugin from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite'; // <-- 1. NEW TAILWIND IMPORT
 import fs from 'fs';
 import path from 'path';
 import child_process from 'child_process';
@@ -39,7 +40,10 @@ const target = env.ASPNETCORE_HTTPS_PORT ? `https://localhost:${env.ASPNETCORE_H
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    plugins: [plugin()],
+    plugins: [
+        plugin(),
+        tailwindcss() // <-- 2. NEW TAILWIND PLUGIN ADDED HERE
+    ],
     resolve: {
         alias: {
             '@': fileURLToPath(new URL('./src', import.meta.url))

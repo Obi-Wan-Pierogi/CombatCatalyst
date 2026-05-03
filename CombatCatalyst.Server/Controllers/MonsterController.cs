@@ -11,7 +11,7 @@ namespace CombatCatalyst.Server.Controllers
     public class MonsterController : ControllerBase
     {
         private readonly IOpen5eService _open5eService;
-        private readonly AppDbContext _context; // Our new database bridge
+        private readonly AppDbContext _context; 
         private readonly ILogger<MonsterController> _logger;
 
         public MonsterController(IOpen5eService open5eService, AppDbContext context, ILogger<MonsterController> logger)
