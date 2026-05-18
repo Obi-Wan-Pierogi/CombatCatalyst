@@ -35,6 +35,14 @@ export interface ActiveCombatant extends Monster {
 
     // Status Management
     conditions: string[];         // e.g., ['Prone', 'Grappled']
+
+    // Action Economy & Advanced Rules
+    actionUsed: boolean;
+    bonusActionUsed: boolean;
+    movementRemaining: number;
+    speedInFeet: number;
+    isSurprised: boolean;
+    isConcentrating: boolean;
 }
 
 /**

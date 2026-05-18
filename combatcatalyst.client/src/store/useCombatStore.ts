@@ -74,7 +74,11 @@ export const useCombatStore = create<CombatStore>()((set) => ({
                         return {
                             ...c,
                             hasReactionAvailable: true,
-                            legendaryActionsRemaining: 3 // Reset to standard legendary cap
+                            legendaryActionsRemaining: 3, // Reset to standard legendary cap
+                            actionUsed: false,
+                            bonusActionUsed: false,
+                            movementRemaining: c.speedInFeet || 30, // Reset movement allowance
+                            isSurprised: false // Surprise condition naturally ends after their first turn
                         };
                     }
                     return c;
