@@ -5,6 +5,22 @@
 
 ---
 
+### v0.4 (Week 7: Advanced Mechanics & Layout Overhaul)
+
+* **Architectural Layout Evolution:** Refactored the primary workspace (CombatDashboard) from a rigid layout to a responsive Flexbox architecture. Implemented a dual-state structural sidebar: a persistent sidebar on desktop utility viewports and an auto-collapsing, off-canvas drawer on mobile viewports. Dynamically adjusted the container budget from w-80 to w-96 to entirely resolve data clipping during information-dense stat block rendering.
+
+* **Action Economy State Engine:** Upgraded the global ActiveCombatant interface and database tracking models to enforce strict 5th Edition turn logic. The frontend state machine now actively tracks action variables (actionUsed, bonusActionUsed), movement budgets (movementRemaining, speedInFeet), surprise flags (isSurprised), and active magical stress (isConcentrating).
+
+* **Turn Pointer Automation:** Extended the Zustand NEXT_TURN reducer logic to act as an automated referee. The engine now dynamically processes turn-start triggers, automatically resetting action/bonus action allowances, recalculating movement parameters, and cycling off transient conditions like the "Surprised" penalty state.
+
+* **Data Engineering & Ingestion:** Developed the LocalDatabaseAccordion view to directly query and map models cached inside the C# SQLite database tier. Refactored the data-hydration logic to enforce strict type compliance under rigorous ESLint configurations, successfully eliminating implicit any type escapes and ensuring state modification purity.
+
+* **Player Integration Subsystem:** Created the AddPlayerModal input module, providing the Dungeon Master with a clean pathway to manually insert asymmetric Player Character (PC) state directly into the initiative tracking loop without querying the Open5e monster database.
+
+* **Attack-to-Damage Pipeline Validation:** Implemented the AttackResolverModal to execute the "human-in-the-loop" validation workflow outlined in Section 2.1 of the SRS. The engine now intercepts combat propositions, calculates temporary environmental Armor Class modifiers (Half Cover/Three-Quarters Cover) and positioning conditions (Advantage/Disadvantage), and halts execution for DM confirmation before writing damage payloads to the state array.
+
+* **Render Pipeline Performance Optimization:** Encapsulated the core display nodes (CombatantCard) within a React.memo higher-order component. This structural optimization shields the DOM from massive cascading re-render cycles during rapid health point adjustments or condition toggles, keeping execution overhead low.
+
 ### Changelog v0.3 (Week 6 MVP Update):
 * **UI & Styling Integration:** Implemented Tailwind CSS v4 for comprehensive UI styling, layout management, and responsive design.
 * **API to State Integration:** Connected Open5e API ingestion directly to the Zustand state engine, mapping polymorphic snake_case JSON data into the strict camelCase `ActiveCombatant` interface contract upon initialization.
