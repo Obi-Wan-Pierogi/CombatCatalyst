@@ -12,7 +12,6 @@ export const AttackResolverModal: React.FC<Props> = ({ isOpen, onClose, attacker
     const { combatants, applyDamage } = useCombatEngine();
 
     const [coverBonus, setCoverBonus] = useState<number>(0);
-    const [positioning, setPositioning] = useState<string>('Normal');
     const [attackRoll, setAttackRoll] = useState<number | ''>('');
     const [damageAmount, setDamageAmount] = useState<number | ''>('');
 
@@ -30,19 +29,29 @@ export const AttackResolverModal: React.FC<Props> = ({ isOpen, onClose, attacker
         if (isHit && typeof damageAmount === 'number') {
             applyDamage(defenderId, damageAmount);
         }
-        // Reset state for next time
         setCoverBonus(0);
-        setPositioning('Normal');
         setAttackRoll('');
         setDamageAmount('');
         onClose();
     };
 
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            e.stopPropagation();
+            if (isHit && damageAmount !== '') {
+                handleConfirm();
+            }
+        }
+    };
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm">
-            <div className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl w-full max-w-md p-6 flex flex-col gap-6">
+            <div
+                className="bg-slate-900 border border-slate-700 rounded-xl shadow-2xl w-full max-w-md p-6 flex flex-col gap-6"
+                onKeyDown={handleKeyDown}
+            >
 
-                {/* Header */}
                 <div className="border-b border-slate-800 pb-3">
                     <h2 className="text-xl font-bold text-white">Resolve Attack</h2>
                     <p className="text-slate-400 text-sm">
@@ -50,7 +59,6 @@ export const AttackResolverModal: React.FC<Props> = ({ isOpen, onClose, attacker
                     </p>
                 </div>
 
-                {/* Modifiers Section */}
                 <div className="flex flex-col gap-4">
                     <div>
                         <label className="block text-slate-300 text-sm font-semibold mb-1">Target Cover</label>
@@ -66,42 +74,23 @@ export const AttackResolverModal: React.FC<Props> = ({ isOpen, onClose, attacker
                     </div>
 
                     <div>
-                        <label className="block text-slate-300 text-sm font-semibold mb-1">Positioning (Context)</label>
-                        <div className="flex gap-4 bg-slate-800 p-2 rounded border border-slate-700">
-                            {['Normal', 'Advantage', 'Disadvantage'].map(pos => (
-                                <label key={pos} className="flex items-center gap-2 text-sm text-slate-300 cursor-pointer">
-                                    <input
-                                        type="radio"
-                                        name="positioning"
-                                        value={pos}
-                                        checked={positioning === pos}
-                                        onChange={(e) => setPositioning(e.target.value)}
-                                        className="text-orange-500 bg-slate-900 border-slate-700 focus:ring-orange-500"
-                                    />
-                                    {pos}
-                                </label>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div>
                         <label className="block text-slate-300 text-sm font-semibold mb-1">
                             Attack Roll Total <span className="text-slate-500 font-normal">(vs AC {effectiveAC})</span>
                         </label>
                         <input
                             type="number"
+                            min={0}
                             value={attackRoll}
-                            onChange={(e) => setAttackRoll(e.target.value === '' ? '' : Number(e.target.value))}
-                            placeholder="Enter d20 + modifiers..."
+                            onChange={(e) => setAttackRoll(e.target.value === '' ? '' : Math.max(0, Number(e.target.value)))}
+                            placeholder="Enter manual d20 roll + modifiers..."
                             className="w-full bg-slate-800 text-white border border-slate-700 rounded p-2 text-lg focus:ring-2 focus:ring-orange-500 outline-none"
                         />
                     </div>
                 </div>
 
-                {/* Resolution Section */}
                 <div className={`p-4 rounded-lg border transition-colors ${typeof attackRoll !== 'number' ? 'border-slate-800 bg-slate-800/50' : isHit ? 'border-green-600/50 bg-green-900/20' : 'border-slate-600 bg-slate-800'}`}>
                     {typeof attackRoll !== 'number' ? (
-                        <p className="text-slate-500 text-center text-sm italic">Awaiting attack roll...</p>
+                        <p className="text-slate-500 text-center text-sm italic">Awaiting physical dice roll...</p>
                     ) : !isHit ? (
                         <div className="text-center">
                             <span className="text-2xl font-bold text-slate-400">MISS!</span>
@@ -117,8 +106,9 @@ export const AttackResolverModal: React.FC<Props> = ({ isOpen, onClose, attacker
                                 <label className="block text-green-200 text-sm font-semibold mb-1">Damage Amount</label>
                                 <input
                                     type="number"
+                                    min={0}
                                     value={damageAmount}
-                                    onChange={(e) => setDamageAmount(e.target.value === '' ? '' : Number(e.target.value))}
+                                    onChange={(e) => setDamageAmount(e.target.value === '' ? '' : Math.max(0, Number(e.target.value)))}
                                     placeholder="Enter damage..."
                                     className="w-full bg-slate-900 text-white border border-green-800 rounded p-2 font-bold focus:ring-2 focus:ring-green-500 outline-none"
                                 />
@@ -127,15 +117,16 @@ export const AttackResolverModal: React.FC<Props> = ({ isOpen, onClose, attacker
                     )}
                 </div>
 
-                {/* Actions */}
                 <div className="flex gap-3 mt-2">
                     <button
+                        type="button"
                         onClick={onClose}
                         className="flex-1 py-2 rounded text-slate-300 hover:bg-slate-800 transition-colors font-semibold border border-transparent hover:border-slate-700"
                     >
                         Cancel
                     </button>
                     <button
+                        type="button"
                         onClick={handleConfirm}
                         disabled={!isHit || damageAmount === ''}
                         className="flex-1 py-2 rounded text-white bg-orange-600 hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-bold shadow-lg"

@@ -17,36 +17,43 @@ export const MonsterSearch: React.FC = () => {
         setError(null);
 
         try {
-            // Calls your C# backend proxy
             const response = await fetch(`/api/Monster/${encodeURIComponent(searchTerm)}`);
             if (!response.ok) throw new Error('Monster not found or server error');
 
             const monster = await response.json();
 
-            // Calculate standard D&D 5e Dexterity Modifier
             const dexMod = Math.floor((monster.dexterity - 10) / 2);
             const initiative = Math.floor(Math.random() * 20) + 1 + dexMod;
+            const parsedSpeed = parseInt(monster.speed?.walk || monster.speed || '30');
 
             const newCombatant: ActiveCombatant = {
-                ...monster, // Inherit Open5e base stats
+                ...monster,
                 instanceId: crypto.randomUUID(),
                 isPlayer: false,
-                maxHp: monster.hit_points,
-                currentHp: monster.hit_points,
+                size: typeof monster.size === 'string' ? monster.size : 'Medium',
+                type: typeof monster.type === 'string' ? monster.type : 'Unknown',
+                armorClass: monster.armor_class || monster.armorClass || 10,
+                currentHp: monster.hit_points || monster.hitPoints || 10,
+                maxHp: monster.hit_points || monster.hitPoints || 10,
                 tempHp: 0,
-                armorClass: monster.armor_class,
                 initiativeRoll: initiative,
                 deathSaveSuccesses: 0,
                 deathSaveFailures: 0,
                 legendaryActionsRemaining: 3,
                 hasReactionAvailable: true,
-                conditions: []
+                conditions: [],
+                actionUsed: false,
+                bonusActionUsed: false,
+                movementRemaining: parsedSpeed,
+                speedInFeet: parsedSpeed,
+                isSurprised: false,
+                isConcentrating: false
             };
 
             addCombatant(newCombatant);
             setSearchTerm('');
         } catch (err) {
-            setError('Failed to pull monster data. Check C# server connection.');
+            setError('Failed to pull monster data. Check API connection.');
             console.error(err);
         } finally {
             setIsLoading(false);
@@ -56,20 +63,22 @@ export const MonsterSearch: React.FC = () => {
     return (
         <div className="bg-slate-800 p-4 rounded-lg border border-slate-700 shadow-md">
             <h2 className="text-lg font-bold text-white mb-3">Add Combatant</h2>
-            <form onSubmit={handleSearch} className="flex gap-2">
+            {/* UX Update: Responsive form stacking layout */}
+            <form onSubmit={handleSearch} className="flex flex-col 2xl:flex-row gap-2">
+                {/* UX Update: Added min-w-0 to prevent flexbox overflow */}
                 <input
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Search Open5e (e.g., Goblin)"
-                    className="flex-1 bg-slate-900 text-white px-3 py-2 rounded border border-slate-600 focus:outline-none focus:border-blue-500"
+                    className="flex-1 min-w-0 bg-slate-900 text-white px-3 py-2 rounded border border-slate-600 focus:outline-none focus:border-blue-500"
                 />
                 <button
                     type="submit"
                     disabled={isLoading || !searchTerm.trim()}
-                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 px-4 py-2 rounded text-white font-semibold transition-colors"
+                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-slate-600 px-4 py-2 rounded text-white font-semibold transition-colors whitespace-nowrap"
                 >
-                    {isLoading ? 'Rolling...' : 'Roll Initiative'}
+                    {isLoading ? 'Rolling...' : 'Roll & Add'}
                 </button>
             </form>
             {error && <p className="text-red-400 text-sm mt-2">{error}</p>}

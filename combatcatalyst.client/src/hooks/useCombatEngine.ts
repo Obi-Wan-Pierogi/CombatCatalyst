@@ -48,6 +48,15 @@ export const useCombatEngine = () => {
         dispatch({ type: 'TOGGLE_CONDITION', payload: { instanceId, condition } });
     };
 
+    const toggleConcentration = (instanceId: string) => {
+        dispatch({ type: 'TOGGLE_CONCENTRATION', payload: instanceId });
+        // Optional: You can log this event if you want it in the combat log!
+        // const target = combatants.find(c => c.instanceId === instanceId);
+        // if (target) {
+        //     dispatch({ type: 'LOG_EVENT', payload: `${target.name} ${!target.isConcentrating ? 'began' : 'dropped'} concentration.` });
+        // }
+    };
+
     const nextTurn = () => {
         dispatch({ type: 'NEXT_TURN' });
         const nextUp = combatants[(activeCombatantIndex + 1) % combatants.length];
@@ -83,6 +92,7 @@ export const useCombatEngine = () => {
         applyDamage,
         applyHealing,
         toggleCondition,
+        toggleConcentration,
         nextTurn,
         updateDeathSaves,
         resetCombat

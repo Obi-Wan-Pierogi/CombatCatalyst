@@ -62,5 +62,34 @@ namespace CombatCatalyst.Server.Controllers
 
             return Ok(apiMonster);
         }
+
+        // GET: api/Monster (This populates the Bestiary)
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Monster>>> GetAll()
+        {
+            _logger.LogInformation("Fetching all saved monsters for the Bestiary.");
+            var monsters = await _context.Monsters
+                .OrderBy(m => m.Name)
+                .ToListAsync();
+
+            return Ok(monsters);
+        }
+
+        // DELETE: api/Monster/{id} (This allows you to remove them from the Bestiary)
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var monster = await _context.Monsters.FindAsync(id);
+            if (monster == null)
+            {
+                return NotFound();
+            }
+
+            _context.Monsters.Remove(monster);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Deleted monster ID {Id} from local database.", id);
+            return NoContent();
+        }
     }
 }

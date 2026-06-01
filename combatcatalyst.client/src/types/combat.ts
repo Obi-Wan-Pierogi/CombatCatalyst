@@ -75,6 +75,7 @@ export type CombatAction =
     | { type: 'REMOVE_COMBATANT'; payload: string }
     | { type: 'UPDATE_HP'; payload: { instanceId: string; amount: number } }
     | { type: 'TOGGLE_CONDITION'; payload: { instanceId: string; condition: string } }
+    | { type: 'TOGGLE_CONCENTRATION'; payload: string }
     | { type: 'UPDATE_DEATH_SAVES'; payload: { instanceId: string; successes: number; failures: number } }
     | { type: 'NEXT_TURN' }
     | { type: 'RESET_COMBAT' }

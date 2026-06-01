@@ -16,6 +16,7 @@ namespace CombatCatalyst.Server.Data
         public DbSet<MonsterAction> MonsterActions { get; set; }
         public DbSet<LegendaryAction> LegendaryActions { get; set; }
         public DbSet<Reaction> Reactions { get; set; }
+        public DbSet<PlayerCharacter> PlayerCharacters { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

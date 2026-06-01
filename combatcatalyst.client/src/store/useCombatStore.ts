@@ -55,6 +55,15 @@ export const useCombatStore = create<CombatStore>()((set) => ({
                     )
                 };
 
+            case 'TOGGLE_CONCENTRATION':
+                return {
+                    combatants: state.combatants.map(c =>
+                        c.instanceId === action.payload
+                            ? { ...c, isConcentrating: !c.isConcentrating }
+                            : c
+                    )
+                };
+
             case 'UPDATE_DEATH_SAVES':
                 return {
                     combatants: state.combatants.map(c =>
