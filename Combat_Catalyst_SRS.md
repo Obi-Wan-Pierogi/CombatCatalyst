@@ -1,9 +1,24 @@
 # IT 460 Capstone: Software Requirements Specification (SRS)
 **Project Name:** The Combat Catalyst
 **Author:** Lee Houk
-**Version:** 0.3 (Week 6 MVP Update)
+**Version:** 0.5 (UX Refinement & Player Persistence)
 
 ---
+
+### v0.5 (Week 9: UX Refinement & Player Persistence)
+
+* **Death Saving Throw Engine:** Implemented a granular state tracking system for Player Characters at 0 HP. The UI dynamically swaps standard HP controls for a DeathSaveTracker grid, allowing DMs to toggle successes/failures, with state persisted via the central Zustand engine.
+
+* **Condition & Concentration Tracking:** Added a robust condition management subsystem. Combatant cards now feature an interactive condition selector and a "Concentration" toggle. All standard D&D 5e conditions are mapped to an official rules dictionary (data/conditions.ts), exposed via hover-based CSS tooltips using Tailwind's group architecture.
+
+* **Persistent Party Roster:** Architected a dedicated PlayerCharacter data tier in the C# backend. Players are now persisted in the SQLite database, enabling a "Party Roster" feature. The DM can now instantly inject saved players into encounters, complete with pre-defined stats and initiative bonuses.
+
+* **Attack-to-Damage UX Polish:** Pivoted from an automated dice-rolling flow to a "DM-as-Referee" model. The AttackResolverModal now provides a lightweight input for manual dice results, granting the DM full agency while maintaining data integrity via automated AC-vs-Roll validation and negative-input protection.
+
+* **UI/UX Layout Hardening:** Executed a comprehensive CSS audit. Resolved flexbox overflow issues in the search form by implementing min-w-0 constraints, ensured correct tooltip positioning through z-index layering and overflow clipping removal, and implemented responsive stacking for combatant input controls.
+
+* **State Machine Purity:** Refactored all impure math functions (dice rolls) and state updates out of the React render cycle, resolving ESLint purity warnings and preventing cascading re-render bugs during high-frequency combat updates.
+
 
 ### v0.4 (Week 7: Advanced Mechanics & Layout Overhaul)
 
@@ -60,6 +75,9 @@ Monsters retrieved from the Open5e API do not follow a uniform structure; a "Zom
 * **FR4: Manual Overrides:** The system shall provide a confirmation step for all automated actions to allow for DM intervention and player reactions.
 * **FR5: State Tracking:** The system shall track health, "Downed/Death Save" status (including specific successes and failures), and limited-use resources like Legendary Actions and Reactions. The system will use unique instance tracking (`instanceId`) to manage states for multiple identical creature types in the same encounter.
 * **FR6: Group Logic:** The system shall support "Group Saves," allowing the DM to roll a single saving throw for a group of identical enemies while displaying individual success/failure results.
+* **FR7: Persistent Party Roster:** The system shall allow the DM to save Player Characters to a persistent local database, allowing for rapid party selection in future encounters.
+* **FR8:** Condition Tracking: The system shall track active status effects on combatants, providing on-demand mechanical reference tooltips for all standard 5e conditions.
+* **FR9:** Player Death Survival: The system shall automatically detect when a Player Character reaches 0 HP and provide an interactive grid for tracking Death Saving Throws.
 
 ---
 
@@ -89,6 +107,6 @@ Monsters retrieved from the Open5e API do not follow a uniform structure; a "Zom
 - [x] **Turn Cycle Automation:** DM can advance to the "Next Turn," visually highlighting the active creature and automatically resetting its Reactions and Legendary Actions.
 
 ### 7. Post-MVP Feature Backlog (Weeks 7-8)
-- [ ] **Local Bestiary Integration:** Connect the React UI to the C# SQLite database to quickly add previously saved monsters to encounters.
+- [X] **Local Bestiary Integration:** Connect the React UI to the C# SQLite database to quickly add previously saved monsters to encounters.
 - [ ] **Roll All Initiative:** Implement a global action to add unrolled monsters to an encounter and roll their initiatives simultaneously to start combat.
-- [ ] **Custom Damage Inputs:** Replace placeholder health buttons with a dynamic input field for exact damage/healing numbers.
+- [X] **Custom Damage Inputs:** Replace placeholder health buttons with a dynamic input field for exact damage/healing numbers.
