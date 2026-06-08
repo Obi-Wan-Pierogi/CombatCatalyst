@@ -5,6 +5,18 @@
 
 ---
 
+### v0.6 (Week 10: Initiative Carousel & Responsive Architecture)
+
+* **Carousel Initiative Engine:** Refactored the useCombatStore queue logic from a static index tracker to a dynamic carousel rotation model. The NEXT_TURN reducer now shifts the active combatant to the end of the array, maintaining the active turn at Index 0. The engine automatically resets turn-based resources (actions, bonus actions, movement) upon a combatant's rotation to the active slot.
+
+* **Automated Round Tracking:** Upgraded the global round calculation logic to support the new carousel array. The state engine now dynamically calculates the highest original initiative roll currently present on the battlefield, automatically incrementing the Encounter Round counter whenever that peak combatant rotates back into the active position.
+
+* **Responsive Grid Architecture:** Overhauled the primary CombatDashboard layout from a rigid maximum-width container to an unbounded, fluid CSS Grid. By utilizing an auto-fit matrix combined with minmax constraints, the initiative board now scales infinitely from a single column to 5+ columns, fully maximizing horizontal real estate on ultra-wide monitor displays.
+
+* **Death State & Revive Mechanics:** Upgraded the 0 HP state logic to strictly adhere to D&D 5e healing rules. Implemented a dedicated "Revive (1 HP)" action injected directly into the absolute-positioned death overlay. Additionally, relocated the Player Character Death Save tracker to the absolute top of the visual hierarchy to prevent DOM overlap and streamline DM interaction during critical encounters.
+
+* **Z-Index Layering & UI Hardening: Executed a z-index stacking context audit across the CombatantCard component. Elevated administrative controls and death save inputs to a z-index layer above the death shroud to prevent click-blocking. Applied flex-wrap constraints to internal flexbox rows (HP modules, conditions, header blocks) to gracefully handle severe viewport compression within narrow grid columns without component clipping.
+
 ### v0.5 (Week 9: UX Refinement & Player Persistence)
 
 * **Death Saving Throw Engine:** Implemented a granular state tracking system for Player Characters at 0 HP. The UI dynamically swaps standard HP controls for a DeathSaveTracker grid, allowing DMs to toggle successes/failures, with state persisted via the central Zustand engine.
