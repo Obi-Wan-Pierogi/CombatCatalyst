@@ -12,6 +12,11 @@ export interface Monster {
     // ... any additional static properties from the Open5e API
 }
 
+export interface MonsterTrait {
+    name: string;
+    desc: string;
+}
+
 /**
  * PHASE 1 UPDATED: ActiveCombatant
  * Extends Monster to include dynamic state for the combat engine.
@@ -27,6 +32,14 @@ export interface ActiveCombatant extends Monster {
     tempHp: number;
     initiativeRoll: number;
 
+    // Stats
+    strength?: number;
+    dexterity?: number;
+    constitution?: number;
+    intelligence?: number;
+    wisdom?: number;
+    charisma?: number;
+
     // SRS MVP Requirements
     deathSaveSuccesses: number;   // Range: 0-3
     deathSaveFailures: number;    // Range: 0-3
@@ -35,6 +48,10 @@ export interface ActiveCombatant extends Monster {
 
     // Status Management
     conditions: string[];         // e.g., ['Prone', 'Grappled']
+
+    // Actions and Abilities
+    special_abilities?: MonsterTrait[];
+    actions?: MonsterTrait[];
 
     // Action Economy & Advanced Rules
     actionUsed: boolean;

@@ -69,6 +69,10 @@ namespace CombatCatalyst.Server.Controllers
         {
             _logger.LogInformation("Fetching all saved monsters for the Bestiary.");
             var monsters = await _context.Monsters
+                .Include(m => m.Actions)
+                .Include(m => m.SpecialAbilities)
+                .Include(m => m.LegendaryActions)
+                .Include(m => m.Reactions)
                 .OrderBy(m => m.Name)
                 .ToListAsync();
 

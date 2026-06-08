@@ -13,9 +13,9 @@ export const CombatDashboard: React.FC = () => {
 
     return (
         <div className="min-h-screen bg-slate-950 p-4 lg:p-6 font-sans overflow-x-hidden relative">
-            <div className="max-w-7xl mx-auto flex flex-col gap-6">
+            <div className="w-full flex flex-col gap-6">
 
-                {/* Mobile Header Update */}
+                {/* Mobile Header */}
                 <header className="mb-4 lg:mb-8 border-b border-slate-800 pb-4 flex justify-between items-center">
                     <div>
                         <h1 className="text-2xl lg:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400">
@@ -106,12 +106,12 @@ export const CombatDashboard: React.FC = () => {
                                     <p className="text-sm">Search or use the Bestiary to begin.</p>
                                 </div>
                             ) : (
-                                <div className="flex flex-col gap-3">
+                                <div className="w-full grid grid-cols-[repeat(auto-fit,minmax(340px,1fr))] gap-4 items-start">
                                     {combatants.map((combatant, index) => (
                                         <CombatantCard
                                             key={combatant.instanceId}
                                             combatant={combatant}
-                                            isActiveTurn={index === activeCombatantIndex}
+                                            isActiveTurn={index === 0}
                                         />
                                     ))}
                                 </div>
