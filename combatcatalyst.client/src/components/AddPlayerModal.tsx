@@ -22,11 +22,9 @@ const rollPlayerInitiative = (bonus: number): number => {
 export const AddPlayerModal: React.FC<Props> = ({ isOpen, onClose }) => {
     const { addCombatant } = useCombatEngine();
 
-    // Roster State
     const [savedPlayers, setSavedPlayers] = useState<SavedPlayer[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    // Form State
     const [name, setName] = useState('');
     const [ac, setAc] = useState<number | ''>('');
     const [hp, setHp] = useState<number | ''>('');
@@ -34,7 +32,11 @@ export const AddPlayerModal: React.FC<Props> = ({ isOpen, onClose }) => {
     const [manualInitTotal, setManualInitTotal] = useState<number | ''>('');
     const [saveToRoster, setSaveToRoster] = useState(true);
 
-    // Safely isolated useEffect to completely satisfy the linter
+    /**
+     * Fetches the persistent player roster from the local database on component mount.
+     * Implements an isMounted safeguard to prevent state updates on unmounted components
+     * if the user closes the modal before the async fetch resolves.
+     */
     useEffect(() => {
         if (!isOpen) return;
 
@@ -45,7 +47,6 @@ export const AddPlayerModal: React.FC<Props> = ({ isOpen, onClose }) => {
                 const response = await fetch('/api/Player', { cache: 'no-store' });
                 if (response.ok) {
                     const data = await response.json();
-                    // Only update state if the modal is still open
                     if (isMounted) {
                         setSavedPlayers(data);
                     }
@@ -61,7 +62,6 @@ export const AddPlayerModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
         fetchPlayers();
 
-        // Cleanup function to prevent memory leaks if closed mid-fetch
         return () => {
             isMounted = false;
         };
@@ -100,11 +100,15 @@ export const AddPlayerModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
         injectToEngine(name, Number(ac), Number(hp), Number(manualInitTotal));
 
-        // Reset Form
         setName(''); setAc(''); setHp(''); setInitBonus(''); setManualInitTotal('');
         onClose();
     };
 
+    /**
+     * State Adapter Pattern:
+     * Bridges the gap between the lightweight SQLite Player model and the 
+     * highly complex, resource-heavy ActiveCombatant state required by the encounter engine.
+     */
     const injectToEngine = (pcName: string, pcAc: number, pcHp: number, pcInit: number) => {
         const newPc = {
             instanceId: crypto.randomUUID(),
@@ -151,7 +155,6 @@ export const AddPlayerModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
                 <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
 
-                    {/* Left Column: Saved Roster */}
                     <div className="flex flex-col border-b md:border-b-0 md:border-r border-slate-800 pb-6 md:pb-0 md:pr-6">
                         <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Saved Roster</h3>
                         {isLoading ? (
@@ -181,7 +184,6 @@ export const AddPlayerModal: React.FC<Props> = ({ isOpen, onClose }) => {
                         )}
                     </div>
 
-                    {/* Right Column: Add New PC */}
                     <div>
                         <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Add Manual PC</h3>
                         <form onSubmit={handleManualSubmit} className="flex flex-col gap-4">

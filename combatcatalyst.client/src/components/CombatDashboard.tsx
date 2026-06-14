@@ -15,7 +15,6 @@ export const CombatDashboard: React.FC = () => {
         <div className="min-h-screen bg-slate-950 p-4 lg:p-6 font-sans overflow-x-hidden relative">
             <div className="w-full flex flex-col gap-6">
 
-                {/* Mobile Header */}
                 <header className="mb-4 lg:mb-8 border-b border-slate-800 pb-4 flex justify-between items-center">
                     <div>
                         <h1 className="text-2xl lg:text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400">
@@ -32,10 +31,8 @@ export const CombatDashboard: React.FC = () => {
                     </button>
                 </header>
 
-                {/* Main Flex Layout */}
                 <div className="flex flex-col lg:flex-row gap-8 items-start relative">
 
-                    {/* Overlay for Mobile Sidebar */}
                     {isMobileSidebarOpen && (
                         <div
                             className="fixed inset-0 bg-black/50 z-30 lg:hidden backdrop-blur-sm"
@@ -43,7 +40,6 @@ export const CombatDashboard: React.FC = () => {
                         />
                     )}
 
-                    {/* Sidebar (Left Column) */}
                     <div className={`fixed inset-y-0 left-0 z-40 w-96 transform bg-slate-900 border-r border-slate-800 p-6 flex flex-col gap-6 overflow-y-auto transition-transform duration-300 lg:relative lg:translate-x-0 lg:w-96 lg:shrink-0 lg:z-0 ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
 
                         <button
@@ -64,7 +60,6 @@ export const CombatDashboard: React.FC = () => {
 
                         <LocalDatabaseAccordion />
 
-                        {/* Encounter Status block */}
                         <div className="bg-slate-800 p-4 rounded-lg border border-slate-700 shadow-md mt-auto lg:mt-0">
                             <div className="flex justify-between items-center mb-4">
                                 <h2 className="text-lg font-bold text-white">Encounter Status</h2>
@@ -93,7 +88,6 @@ export const CombatDashboard: React.FC = () => {
 
                     </div>
 
-                    {/* Right Column (Initiative Tracker) */}
                     <div className="flex-1 w-full">
                         <div className="bg-slate-900 rounded-lg border border-slate-800 p-4 min-h-[500px] shadow-lg">
                             <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
@@ -106,6 +100,10 @@ export const CombatDashboard: React.FC = () => {
                                     <p className="text-sm">Search or use the Bestiary to begin.</p>
                                 </div>
                             ) : (
+                                /* Fluid Grid Architecture:
+                                Utilizes CSS Grid auto-fit combined with minmax to dynamically calculate columns.
+                                This ensures the UI scales infinitely across ultra-wide monitors without requiring hardcoded media queries.
+                                */
                                 <div className="w-full grid grid-cols-[repeat(auto-fit,minmax(340px,1fr))] gap-4 items-start">
                                     {combatants.map((combatant, index) => (
                                         <CombatantCard

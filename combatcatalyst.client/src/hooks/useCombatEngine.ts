@@ -5,9 +5,10 @@ import type { ActiveCombatant } from '../types/combat';
 /**
  * The Combat Engine Facade
  * Acts as a protective layer between the UI and the Zustand store.
+ * Encapsulates dispatch actions into semantic functions to prevent raw state mutations
+ * from bleeding into the presentation layer.
  */
 export const useCombatEngine = () => {
-    // 1. Extract State
     const combatants = useCombatStore((state) => state.combatants);
     const currentRound = useCombatStore((state) => state.currentRound);
     const activeCombatantIndex = useCombatStore((state) => state.activeCombatantIndex);
@@ -15,13 +16,15 @@ export const useCombatEngine = () => {
     const isCombatStarted = useCombatStore((state) => state.isCombatStarted);
     const dispatch = useCombatStore((state) => state.dispatch);
 
-    // 2. Derived State
-    // We use useMemo to ensure activeCombatant only recalculates if the dependencies change
+    /**
+     * Memoized active combatant derivation.
+     * Prevents unnecessary re-renders in components relying on the active turn object
+     * when unrelated state properties change.
+     */
     const activeCombatant = useMemo(() => {
         return combatants[activeCombatantIndex] || null;
     }, [combatants, activeCombatantIndex]);
 
-    // 3. Wrapper Functions (The Shield)
     const addCombatant = (combatant: ActiveCombatant) => {
         dispatch({ type: 'ADD_COMBATANT', payload: combatant });
         dispatch({ type: 'LOG_EVENT', payload: `Added ${combatant.name} to the fray.` });
@@ -37,7 +40,6 @@ export const useCombatEngine = () => {
 
     const applyDamage = (instanceId: string, amount: number) => {
         dispatch({ type: 'UPDATE_HP', payload: { instanceId, amount: -amount } });
-        // Note: Logging for damage/healing is usually handled here for cleaner UI components
     };
 
     const applyHealing = (instanceId: string, amount: number) => {
@@ -50,13 +52,13 @@ export const useCombatEngine = () => {
 
     const toggleConcentration = (instanceId: string) => {
         dispatch({ type: 'TOGGLE_CONCENTRATION', payload: instanceId });
-        // Optional: You can log this event if you want it in the combat log!
-        // const target = combatants.find(c => c.instanceId === instanceId);
-        // if (target) {
-        //     dispatch({ type: 'LOG_EVENT', payload: `${target.name} ${!target.isConcentrating ? 'began' : 'dropped'} concentration.` });
-        // }
     };
 
+    /**
+     * Executes the carousel rotation in the underlying state.
+     * The combatant previously at index 0 is shifted to the end, making the combatant
+     * at index 1 the new active entity.
+     */
     const nextTurn = () => {
         dispatch({ type: 'NEXT_TURN' });
         const nextUp = combatants[(activeCombatantIndex + 1) % combatants.length];
@@ -76,17 +78,13 @@ export const useCombatEngine = () => {
         }
     };
 
-    // 4. Return Object
     return {
-        // State Variables
         combatants,
         currentRound,
         activeCombatantIndex,
         activeCombatant,
         combatLog,
         isCombatStarted,
-
-        // Wrapper Functions
         addCombatant,
         removeCombatant,
         applyDamage,

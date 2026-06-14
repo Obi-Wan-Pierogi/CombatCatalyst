@@ -9,7 +9,6 @@ export interface Monster {
     armorClass: number;
     hitPoints: number;
     speed: string;
-    // ... any additional static properties from the Open5e API
 }
 
 export interface MonsterTrait {
@@ -18,13 +17,13 @@ export interface MonsterTrait {
 }
 
 /**
- * PHASE 1 UPDATED: ActiveCombatant
- * Extends Monster to include dynamic state for the combat engine.
+ * Extends the base Monster model to include dynamic state for the combat engine.
+ * Represents a unique, active entity currently on the battlefield.
  */
 export interface ActiveCombatant extends Monster {
     // Unique Identifiers
-    instanceId: string;           // Allows multiple "Goblin" instances
-    isPlayer: boolean;            // Differentiates PCs from NPCs
+    instanceId: string;           // Differentiates multiple instances of the same monster type (e.g., Goblin 1 vs Goblin 2)
+    isPlayer: boolean;            // Bypasses automated stat blocks and enables player-specific UI (e.g., Death Saves)
 
     // Vitality & Resources
     currentHp: number;
@@ -32,7 +31,7 @@ export interface ActiveCombatant extends Monster {
     tempHp: number;
     initiativeRoll: number;
 
-    // Stats
+    // Core Stats
     strength?: number;
     dexterity?: number;
     constitution?: number;
@@ -40,20 +39,18 @@ export interface ActiveCombatant extends Monster {
     wisdom?: number;
     charisma?: number;
 
-    // SRS MVP Requirements
-    deathSaveSuccesses: number;   // Range: 0-3
-    deathSaveFailures: number;    // Range: 0-3
+    // State Tracking
+    deathSaveSuccesses: number;
+    deathSaveFailures: number;
     legendaryActionsRemaining: number;
     hasReactionAvailable: boolean;
-
-    // Status Management
-    conditions: string[];         // e.g., ['Prone', 'Grappled']
+    conditions: string[];
 
     // Actions and Abilities
     special_abilities?: MonsterTrait[];
     actions?: MonsterTrait[];
 
-    // Action Economy & Advanced Rules
+    // Action Economy Tracking
     actionUsed: boolean;
     bonusActionUsed: boolean;
     movementRemaining: number;
@@ -84,8 +81,7 @@ export interface CombatState {
 }
 
 /**
- * PHASE 1 UPDATED: CombatAction
- * Exhaustive list of intents for the Dispatcher.
+ * Exhaustive list of state mutation intents for the Zustand Dispatcher.
  */
 export type CombatAction =
     | { type: 'ADD_COMBATANT'; payload: ActiveCombatant }

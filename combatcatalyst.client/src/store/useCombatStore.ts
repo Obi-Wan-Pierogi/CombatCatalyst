@@ -1,10 +1,15 @@
 import { create } from 'zustand';
-import type { CombatState, CombatAction, ActiveCombatant } from '../types/combat';
+import type { CombatState, CombatAction } from '../types/combat';
 
 interface CombatStore extends CombatState {
     dispatch: (action: CombatAction) => void;
 }
 
+/**
+ * Central state management engine.
+ * Utilizes the Zustand Facade pattern to expose a single dispatch method,
+ * shielding React components from direct state mutation logic and reducing re-renders.
+ */
 export const useCombatStore = create<CombatStore>()((set) => ({
     combatants: [],
     currentRound: 1,
@@ -26,9 +31,6 @@ export const useCombatStore = create<CombatStore>()((set) => ({
                     newCombatant.name = `${baseName} ${matches.length + 1}`;
                 }
 
-                // Note: If you add someone MID-COMBAT in a carousel, 
-                // you may want to rethink this sort in the future so it doesn't 
-                // instantly jump them to the top of the line. For now, it remains as requested.
                 const updatedList = [...state.combatants, newCombatant];
                 updatedList.sort((a, b) => b.initiativeRoll - a.initiativeRoll);
 
@@ -84,7 +86,12 @@ export const useCombatStore = create<CombatStore>()((set) => ({
             case 'NEXT_TURN': {
                 if (state.combatants.length === 0) return state;
 
-                // 1. Copy the array and apply the carousel shift
+                /**
+                 * Carousel Initiative Rotation
+                 * Shifts the active combatant to the end of the queue.
+                 * This guarantees the currently acting entity is always locked to index 0,
+                 * simplifying downstream UI rendering logic.
+                 */
                 const updatedCombatants = [...state.combatants];
                 const finishedCombatant = updatedCombatants.shift();
 
@@ -92,7 +99,7 @@ export const useCombatStore = create<CombatStore>()((set) => ({
                     updatedCombatants.push(finishedCombatant);
                 }
 
-                // 2. Refresh resources for the NEW top combatant (index 0)
+                // Reset 5e action economy resources for the incoming active combatant
                 if (updatedCombatants.length > 0) {
                     updatedCombatants[0] = {
                         ...updatedCombatants[0],
@@ -105,12 +112,14 @@ export const useCombatStore = create<CombatStore>()((set) => ({
                     };
                 }
 
-                // 3. Check if we wrapped around to the top of the round
+                /**
+                 * Round Calculation
+                 * Tracks the highest original initiative roll on the board.
+                 * When that specific combatant rotates back to index 0, a full round has elapsed.
+                 */
                 let nextRound = state.currentRound;
                 if (updatedCombatants.length > 1) {
-                    // Find the absolute highest initiative score currently on the board
                     const highestInit = Math.max(...updatedCombatants.map(c => c.initiativeRoll));
-                    // If the guy who just rotated to the top has that highest score, it's a new round!
                     if (updatedCombatants[0].initiativeRoll === highestInit) {
                         nextRound += 1;
                     }
@@ -118,7 +127,7 @@ export const useCombatStore = create<CombatStore>()((set) => ({
 
                 return {
                     combatants: updatedCombatants,
-                    activeCombatantIndex: 0, // Always 0 in a carousel!
+                    activeCombatantIndex: 0,
                     currentRound: nextRound,
                     isCombatStarted: true
                 };

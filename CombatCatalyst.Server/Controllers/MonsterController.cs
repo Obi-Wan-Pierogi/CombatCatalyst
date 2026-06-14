@@ -1,8 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using CombatCatalyst.Server.Services;
 using CombatCatalyst.Server.Models;
-using CombatCatalyst.Server.Data; // Add this
-using Microsoft.EntityFrameworkCore; // Add this
+using CombatCatalyst.Server.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace CombatCatalyst.Server.Controllers
 {
@@ -11,7 +16,7 @@ namespace CombatCatalyst.Server.Controllers
     public class MonsterController : ControllerBase
     {
         private readonly IOpen5eService _open5eService;
-        private readonly AppDbContext _context; 
+        private readonly AppDbContext _context;
         private readonly ILogger<MonsterController> _logger;
 
         public MonsterController(IOpen5eService open5eService, AppDbContext context, ILogger<MonsterController> logger)
@@ -24,7 +29,12 @@ namespace CombatCatalyst.Server.Controllers
         [HttpGet("{name}")]
         public async Task<ActionResult<Monster>> Get(string name)
         {
-            // 1. Check the local SQL Database first
+            /**
+             * Cache-Aside Pattern Implementation
+             * Queries the local SQLite data tier first, eager-loading child collections
+             * to fulfill the entity structure completely. If a cache miss occurs, the 
+             * request delegates data ingestion to the Open5eService.
+             */
             var localMonster = await _context.Monsters
                 .Include(m => m.Actions)
                 .Include(m => m.SpecialAbilities)
@@ -38,7 +48,6 @@ namespace CombatCatalyst.Server.Controllers
                 return Ok(localMonster);
             }
 
-            // 2. If not found locally, fetch from the API
             _logger.LogInformation("{Name} not found locally. Fetching from Open5e...", name);
             var apiMonster = await _open5eService.GetMonsterAsync(name);
 
@@ -47,7 +56,6 @@ namespace CombatCatalyst.Server.Controllers
                 return NotFound("Monster not found in local DB or external API.");
             }
 
-            // 3. Save the new monster to our local database for next time
             try
             {
                 _context.Monsters.Add(apiMonster);
@@ -56,14 +64,17 @@ namespace CombatCatalyst.Server.Controllers
             }
             catch (Exception ex)
             {
-                // We log the error but still return the monster so the user isn't interrupted
+                /**
+                 * Fail-Safe Fault Tolerance:
+                 * Logs any internal persistence database exceptions, but returns the 
+                 * runtime entity back to the UI to ensure DM gameplay isn't blocked.
+                 */
                 _logger.LogError("Could not save monster to DB: {Message}", ex.Message);
             }
 
             return Ok(apiMonster);
         }
 
-        // GET: api/Monster (This populates the Bestiary)
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Monster>>> GetAll()
         {
@@ -79,7 +90,6 @@ namespace CombatCatalyst.Server.Controllers
             return Ok(monsters);
         }
 
-        // DELETE: api/Monster/{id} (This allows you to remove them from the Bestiary)
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {

@@ -9,6 +9,11 @@ export const MonsterSearch: React.FC = () => {
 
     const { addCombatant } = useCombatEngine();
 
+    /**
+     * Executes external API hydration.
+     * Maps the static Monster definition into a dynamic ActiveCombatant
+     * by injecting combat-specific state (e.g., randomized initiative, instance IDs).
+     */
     const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!searchTerm.trim()) return;
@@ -63,9 +68,7 @@ export const MonsterSearch: React.FC = () => {
     return (
         <div className="bg-slate-800 p-4 rounded-lg border border-slate-700 shadow-md">
             <h2 className="text-lg font-bold text-white mb-3">Add Combatant</h2>
-            {/* UX Update: Responsive form stacking layout */}
             <form onSubmit={handleSearch} className="flex flex-col 2xl:flex-row gap-2">
-                {/* UX Update: Added min-w-0 to prevent flexbox overflow */}
                 <input
                     type="text"
                     value={searchTerm}

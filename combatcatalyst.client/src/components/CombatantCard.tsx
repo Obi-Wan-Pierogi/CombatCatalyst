@@ -10,6 +10,11 @@ interface Props {
     isActiveTurn: boolean;
 }
 
+/**
+ * Wrapped in React.memo for strict performance optimization.
+ * Prevents the entire initiative grid from re-rendering when the global state updates,
+ * ensuring only the specific combatant whose props changed (e.g., HP adjustment) triggers a DOM repaint.
+ */
 export const CombatantCard: React.FC<Props> = memo(({ combatant, isActiveTurn }) => {
     const {
         applyDamage,
@@ -59,10 +64,10 @@ export const CombatantCard: React.FC<Props> = memo(({ combatant, isActiveTurn })
         <>
             <div className={`relative p-4 rounded-lg flex flex-col h-full gap-3 transition-all duration-300 ${highlightStyle}`}>
 
-                {/* The Dead Overlay with Quick Revive Button */}
                 {isDead && (
                     <div className="absolute inset-0 bg-red-950/80 backdrop-blur-[2px] flex flex-col items-center justify-center z-30 pointer-events-none rounded-lg">
                         <span className="text-7xl opacity-50 drop-shadow-lg mb-4">☠️</span>
+                        {/* Elevated z-index with pointer-events-auto to intercept clicks above the shroud */}
                         <button
                             onClick={() => applyHealing(combatant.instanceId, 1)}
                             className="bg-green-900/90 hover:bg-green-700 text-green-100 font-bold py-1.5 px-5 rounded-full border border-green-600 shadow-2xl transition-colors pointer-events-auto"
@@ -72,16 +77,16 @@ export const CombatantCard: React.FC<Props> = memo(({ combatant, isActiveTurn })
                     </div>
                 )}
 
-                {/* PC Death Saves (Moved to top, pushed to z-40 so it sits above the overlay) */}
+                {/* Death saves are positioned at the absolute top of the visual hierarchy 
+          and forced to z-40 to prevent layout overlap with the centralized Revive action. 
+        */}
                 {combatant.isPlayer && isDead && (
                     <div className="relative z-40 pointer-events-auto bg-slate-950/90 p-3 rounded-lg shadow-xl border border-slate-700 w-full mb-1">
                         <DeathSaveTracker combatant={combatant} />
                     </div>
                 )}
 
-                {/* Top Row: Name, Init, AC */}
                 <div className="flex flex-wrap justify-between items-start relative gap-2">
-                    {/* We keep the text at z-20 so it sits under the red blur */}
                     <div className="flex-1 min-w-0 relative z-20">
                         <h3 className={`text-xl font-bold flex flex-wrap items-center gap-2 ${isDead ? 'text-red-400' : 'text-white'}`}>
                             {combatant.name}
@@ -117,7 +122,6 @@ export const CombatantCard: React.FC<Props> = memo(({ combatant, isActiveTurn })
                                 🎯 Target
                             </button>
                         )}
-                        {/* Remove button bumped to z-40 so DM can delete dead monsters */}
                         <button
                             onClick={() => removeCombatant(combatant.instanceId)}
                             className="text-red-400 hover:text-red-300 hover:bg-red-950/50 text-sm px-2 py-1 rounded transition-colors pointer-events-auto relative z-40"
@@ -128,7 +132,6 @@ export const CombatantCard: React.FC<Props> = memo(({ combatant, isActiveTurn })
                     </div>
                 </div>
 
-                {/* HP Bar */}
                 <div className="flex flex-wrap justify-between items-center bg-slate-950/50 p-2 rounded relative z-20 mt-1 gap-2">
                     <div className="text-white font-mono whitespace-nowrap">
                         HP: <span className={
@@ -168,7 +171,6 @@ export const CombatantCard: React.FC<Props> = memo(({ combatant, isActiveTurn })
                     )}
                 </div>
 
-                {/* Conditions */}
                 <div className="flex flex-col gap-2 relative z-20 pointer-events-auto mt-1 border-t border-slate-800 pt-3">
                     <div className="flex flex-wrap gap-2 items-center">
                         <select
@@ -213,6 +215,7 @@ export const CombatantCard: React.FC<Props> = memo(({ combatant, isActiveTurn })
                                         ✕
                                     </button>
 
+                                    {/* CSS-driven tooltip utilizing Tailwind group hover architecture */}
                                     <div className="hidden group-hover:block absolute z-50 bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-3 bg-slate-950 border border-slate-700 rounded-lg shadow-2xl text-xs text-slate-300 leading-relaxed whitespace-normal pointer-events-none">
                                         <strong className="text-purple-300 block mb-1">{condition}</strong>
                                         {CONDITION_DESCRIPTIONS[condition]}
@@ -224,7 +227,6 @@ export const CombatantCard: React.FC<Props> = memo(({ combatant, isActiveTurn })
                     )}
                 </div>
 
-                {/* Inline Stat Block Drawer */}
                 {isStatsExpanded && !combatant.isPlayer && (
                     <div className="mt-2 border-t border-slate-600 pt-3 bg-slate-900/80 rounded p-4 relative z-20 pointer-events-auto">
 
